@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Need For Calc - Derivative Racing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .menu {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .menu label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .menu select {
+            padding: 8px;
+            margin-right: 20px;
+            font-size: 14px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .menu button {
+            padding: 10px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .menu button:hover {
+            background: #764ba2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #game {
+            text-align: center;
+        }
+
+        .level-title {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .score-box {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .track {
+            background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+            border: 3px solid #333;
+            border-radius: 10px;
+            height: 80px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .track::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                #fff 0px,
+                #fff 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            transform: translateY(-50%);
+        }
+
+        .car {
+            position: absolute;
+            font-size: 50px;
+            top: 15px;
+            left: 0%;
+            transition: left 0.5s ease;
+            z-index: 10;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: repeating-linear-gradient(
+                45deg,
+                #ff0000 0px,
+                #ff0000 10px,
+                #fff 10px,
+                #fff 20px
+            );
+            z-index: 5;
+        }
+
+        .problem-box {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .problem-box #problem {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            padding: 12px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group button {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .input-group button:hover {
+            background: #764ba2;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .correct {
+            color: #28a745;
+        }
+
+        .incorrect {
+            color: #dc3545;
+        }
+
+        .next-button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .next-button:hover {
+            background: #218838;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: #c82333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏎️ Need For Calc 🏎️</h1>
+
+        <!-- Menu -->
+        <div id="menu" class="menu">
+            <div style="margin-bottom: 15px;">
+                <label for="rule">Select Rule:</label>
+                <select id="rule">
+                    <option value="power">📌 Power Rule</option>
+                    <option value="chain">🔗 Chain Rule</option>
+                    <option value="product">✖️ Product Rule</option>
+                </select>
+                <label for="difficulty">Select Difficulty:</label>
+                <select id="difficulty">
+                    <option value="easy">⭐ Easy</option>
+                    <option value="medium">⭐⭐ Medium</option>
+                    <option value="hard">⭐⭐⭐ Hard</option>
+                </select>
+            </div>
+            <button id="start">Start Game</button>
+        </div>
+
+        <!-- Game -->
+        <div id="game" class="hidden">
+            <div class="level-title" id="levelTitle">Power Rule - Easy</div>
+
+            <div class="score-box">
+                Score: <span id="score">0</span>
+            </div>
+
+            <!-- Racing Track -->
+            <div class="track">
+                <div class="car" id="car">🏎️</div>
+                <div class="finish-line"></div>
+            </div>
+
+            <!-- Problem -->
+            <div class="problem-box">
+                <div id="problem">Problem</div>
+            </div>
+
+            <!-- Input -->
+            <div class="input-group">
+                <input type="text" id="answer" placeholder="Enter your answer (e.g., 6x or 3x^2)">
+                <button id="submit">Submit Answer</button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="message" id="message"></div>
+
+            <!-- Next Button -->
+            <button class="next-button hidden" id="next">Next Problem</button>
+
+            <!-- Back Button -->
+            <button class="back-button" id="back">Back to Menu</button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let carPosition = 0;
+        const globalSettings = { rule: 'power', difficulty: 'easy' };
+
+        const problems = {
+            power: {
+                easy: [
+                    { question: 'f(x) = 2x', answer: '2' },
+                    { question: 'f(x) = 5x', answer: '5' },
+                    { question: 'f(x) = x', answer: '1' },
+                    { question: 'f(x) = 3x', answer: '3' },
+                    { question: 'f(x) = 10x', answer: '10' }
+                ],
+                medium: [
+                    { question: 'f(x) = x^2', answer: '2x' },
+                    { question: 'f(x) = 3x^2', answer: '6x' },
+                    { question: 'f(x) = x^3', answer: '3x^2' },
+                    { question: 'f(x) = 2x^3', answer: '6x^2' },
+                    { question: 'f(x) = 4x^2', answer: '8x' }
+                ],
+                hard: [
+                    { question: 'f(x) = x^5', answer: '5x^4' },
+                    { question: 'f(x) = 3x^4', answer: '12x^3' },
+                    { question: 'f(x) = 2x^6 + 3x^2', answer: '12x^5 + 6x' },
+                    { question: 'f(x) = 5x^3 - 2x', answer: '15x^2 - 2' },
+                    { question: 'f(x) = x^7 + 4x^3', answer: '7x^6 + 12x^2' }
+                ]
+            },
+            chain: {
+                easy: [
+                    { question: 'f(x) = (2x + 1)^2', answer: '4(2x + 1)' },
+                    { question: 'f(x) = (3x)^2', answer: '18x' },
+                    { question: 'f(x) = (x + 1)^2', answer: '2(x + 1)' },
+                    { question: 'f(x) = (5x + 2)^2', answer: '10(5x + 2)' },
+                    { question: 'f(x) = (x - 3)^2', answer: '2(x - 3)' }
+                ],
+                medium: [
+                    { question: 'f(x) = (2x + 1)^3', answer: '6(2x + 1)^2' },
+                    { question: 'f(x) = sin(2x)', answer: '2cos(2x)' },
+                    { question: 'f(x) = (x^2 + 1)^2', answer: '4x(x^2 + 1)' },
+                    { question: 'f(x) = cos(3x)', answer: '-3sin(3x)' },
+                    { question: 'f(x) = (3x - 2)^3', answer: '9(3x - 2)^2' }
+                ],
+                hard: [
+                    { question: 'f(x) = (x^3 + 2x)^4', answer: '4(3x^2 + 2)(x^3 + 2x)^3' },
+                    { question: 'f(x) = sin(x^2)', answer: '2xcos(x^2)' },
+                    { question: 'f(x) = e^(2x)', answer: '2e^(2x)' },
+                    { question: 'f(x) = (sin(x))^2', answer: '2sin(x)cos(x)' },
+                    { question: 'f(x) = ln(2x + 1)', answer: '2/(2x + 1)' }
+                ]
+            },
+            product: {
+                easy: [
+                    { question: 'f(x) = x * 2x', answer: '4x' },
+                    { question: 'f(x) = x * (x + 1)', answer: '2x + 1' },
+                    { question: 'f(x) = 2x * 3x', answer: '12x' },
+                    { question: 'f(x) = x * 5', answer: '5' },
+                    { question: 'f(x) = 3x * 2', answer: '6' }
+                ],
+                medium: [
+                    { question: 'f(x) = x^2 * (2x + 1)', answer: '6x^2 + 2x' },
+                    { question: 'f(x) = (x + 1)(x - 1)', answer: '2x' },
+                    { question: 'f(x) = x * (x^2 + 3)', answer: '3x^2 + 3' },
+                    { question: 'f(x) = (2x + 1)(3x)', answer: '12x + 3' },
+                    { question: 'f(x) = x^2 * (x + 2)', answer: '3x^2 + 4x' }
+                ],
+                hard: [
+                    { question: 'f(x) = (x^2 + 1)(x^3 - 2)', answer: '5x^4 + 3x^2 - 4x' },
+                    { question: 'f(x) = x * sin(x)', answer: 'sin(x) + xcos(x)' },
+                    { question: 'f(x) = (x^3)(2x^2 + 1)', answer: '10x^4 + 3x^2' },
+                    { question: 'f(x) = e^x * x', answer: 'e^x(x + 1)' },
+                    { question: 'f(x) = (2x - 1)(x^3 + x)', answer: '8x^3 - 3x^2 + 2' }
+                ]
+            }
+        };
+
+        let currentProblem = null;
+
+        document.getElementById('start').addEventListener('click', function() {
+            globalSettings.rule = document.getElementById('rule').value;
+            globalSettings.difficulty = document.getElementById('difficulty').value;
+            startGame();
+        });
+
+        function startGame() {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
+
+            let ruleName = globalSettings.rule === 'power' ? 'Power Rule' :
+                          globalSettings.rule === 'chain' ? 'Chain Rule' : 'Product Rule';
+            let diffName = globalSettings.difficulty === 'easy' ? 'Easy' :
+                          globalSettings.difficulty === 'medium' ? 'Medium' : 'Hard';
+
+            document.getElementById('levelTitle').textContent = ruleName + ' - ' + diffName;
+            score = 0;
+            carPosition = 0;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('car').style.left = '0%';
+            loadProblem();
+        }
+
+        function loadProblem() {
+            const problemList = problems[globalSettings.rule][globalSettings.difficulty];
+            currentProblem = problemList[Math.floor(Math.random() * problemList.length)];
+            document.getElementById('problem').innerText = 'Find the derivative of: ' + currentProblem.question;
+            document.getElementById('answer').value = '';
+            document.getElementById('message').innerText = '';
+            document.getElementById('next').classList.add('hidden');
+            document.getElementById('submit').style.display = 'inline-block';
+            document.getElementById('answer').focus();
+        }
+
+        document.getElementById('submit').addEventListener('click', checkAnswer);
+        document.getElementById('answer').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim().toLowerCase().replace(/\s/g, '');
+            const correctAnswer = currentProblem.answer.toLowerCase().replace(/\s/g, '');
+
+            const messageDiv = document.getElementById('message');
+            const submitBtn = document.getElementById('submit');
+            const nextBtn = document.getElementById('next');
+
+            if (userAnswer === correctAnswer) {
+                messageDiv.innerText = '✓ Correct! Great job!';
+                messageDiv.className = 'message correct';
+                score++;
+                carPosition = Math.min(carPosition + 10, 90);
+                document.getElementById('score').textContent = score;
+                document.getElementById('car').style.left = carPosition + '%';
+                submitBtn.style.display = 'none';
+                nextBtn.classList.remove('hidden');
+            } else {
+                messageDiv.innerText = '✗ Incorrect. The answer is: ' + currentProblem.answer;
+                messageDiv.className = 'message incorrect';
+                submitBtn.style.display = 'none';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('next').addEventListener('click', loadProblem);
+
+        document.getElementById('back').addEventListener('click', function() {
+            document.getElementById('game').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
